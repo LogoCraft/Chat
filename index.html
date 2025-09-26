@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anonim Chat Otağı</title>
+    <title>Anonim Mesaj Panosu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -14,18 +14,19 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 1rem;
+            padding: 0;
+            margin: 0;
         }
         .container {
-            max-width: 700px;
+            max-width: none;
             width: 100%;
             background-color: #ffffff;
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-radius: 0;
+            box-shadow: none;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            height: 80vh;
+            height: 100vh;
         }
         .chat-header {
             background-color: #1f2937;
@@ -42,34 +43,42 @@
             gap: 1rem;
         }
         .message {
-            max-width: 80%;
+            max-width: 90%;
             padding: 0.75rem 1rem;
             border-radius: 1.25rem;
             animation: fadeIn 0.5s ease-out;
             word-wrap: break-word;
         }
-        .my-message {
+        .message-self {
             background-color: #3b82f6;
             color: #ffffff;
             align-self: flex-end;
             border-bottom-right-radius: 0.25rem;
         }
-        .other-message {
+        .message-other {
             background-color: #e5e7eb;
             color: #1f2937;
             align-self: flex-start;
             border-bottom-left-radius: 0.25rem;
         }
-        .message-sender {
-            font-size: 0.75rem;
-            color: #6b7280;
-            margin-bottom: 0.25rem;
-        }
-        .chat-input-form {
+        .message-content {
             display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .message-image {
+            max-width: 100%;
+            border-radius: 0.5rem;
+        }
+        .chat-input-container {
             padding: 1rem;
             border-top: 1px solid #e5e7eb;
             background-color: #f9fafb;
+        }
+        .chat-input-form {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
         }
         .chat-input {
             flex-grow: 1;
@@ -82,17 +91,42 @@
         .chat-input:focus {
             border-color: #2563eb;
         }
-        .chat-send-btn {
+        .chat-send-btn, .image-upload-btn {
             background-color: #2563eb;
             color: #ffffff;
             padding: 0.75rem 1.5rem;
             border-radius: 9999px;
             font-weight: 600;
-            margin-left: 0.5rem;
             transition: background-color 0.2s ease-in-out;
+            white-space: nowrap;
         }
-        .chat-send-btn:hover {
+        .chat-send-btn:hover, .image-upload-btn:hover {
             background-color: #1e40af;
+        }
+        .image-preview-container {
+            margin-top: 0.5rem;
+            display: none; /* Initially hidden */
+            position: relative;
+        }
+        .image-preview {
+            max-width: 150px;
+            border-radius: 0.5rem;
+            margin-right: 0.5rem;
+        }
+        .remove-image-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -108,54 +142,66 @@
 <body>
     <div class="container">
         <div class="chat-header">
-            <h1 class="text-2xl font-bold">Anonim Chat Otağı</h1>
-            <p id="user-id-display" class="text-sm mt-1"></p>
+            <h1 class="text-2xl font-bold">Anonim Mesaj Panosu</h1>
         </div>
 
         <div id="message-list-container" class="message-list">
             <p id="loading-text" class="info-text">Mesajlar yüklənir...</p>
         </div>
 
-        <form id="chat-form" class="chat-input-form">
-            <input type="text" id="chat-input" class="chat-input" placeholder="Mesajınızı yazın..." required />
-            <button type="submit" class="chat-send-btn">Göndər</button>
-        </form>
+        <div class="chat-input-container">
+            <div id="image-preview-container" class="image-preview-container">
+                <img id="image-preview" class="image-preview" src="#" alt="Şəkil önizləməsi">
+                <button type="button" id="remove-image-btn" class="remove-image-btn">&times;</button>
+            </div>
+            <form id="chat-form" class="chat-input-form">
+                <label for="image-upload" class="image-upload-btn cursor-pointer">Şəkil</label>
+                <input type="file" id="image-upload" accept="image/*" class="hidden" />
+                <input type="text" id="chat-input" class="chat-input" placeholder="Mesajınızı yazın..." />
+                <button type="submit" class="chat-send-btn">Göndər</button>
+            </form>
+        </div>
     </div>
 
-    <!-- Firebase SDK Skriptləri -->
+    <!-- Firebase SDK Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firestore debug loglarını aktivləşdiririk
+        // Enable Firestore debug logs
         setLogLevel('debug');
 
-        // Global dəyişənləri müəyyən edirik
+        // Define global variables
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // Elementləri seçirik
+        // Select elements
         const messageListContainer = document.getElementById('message-list-container');
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
-        const userIdDisplay = document.getElementById('user-id-display');
         const loadingText = document.getElementById('loading-text');
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const removeImageBtn = document.getElementById('remove-image-btn');
 
-        // Firebase tətbiqini başladırıq
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const storage = getStorage(app);
 
         let currentUserId = null;
+        let selectedFile = null;
 
-        // İstifadəçinin avtorizasiya vəziyyətini izləyirik
+        // Listen for auth state changes
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserId = user.uid;
-                userIdDisplay.textContent = `Sizin ID-niz: ${currentUserId}`;
                 loadingText.textContent = 'Mesajlar yüklənir...';
                 setupRealtimeListener();
             } else {
@@ -166,41 +212,79 @@
                         await signInAnonymously(auth);
                     }
                 } catch (error) {
-                    console.error("Giriş zamanı xəta:", error);
+                    console.error("Login failed:", error);
                     loadingText.textContent = 'Mesajlar yüklənə bilmədi. Xahiş edirik yenidən cəhd edin.';
                 }
             }
         });
 
-        // Mesaj göndərmə funksiyası
+        // Handle image selection
+        imageUpload.addEventListener('change', (event) => {
+            selectedFile = event.target.files[0];
+            if (selectedFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(selectedFile);
+            }
+        });
+
+        // Handle image removal
+        removeImageBtn.addEventListener('click', () => {
+            selectedFile = null;
+            imageUpload.value = '';
+            imagePreviewContainer.style.display = 'none';
+        });
+
+        // Handle message and image sending
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const messageText = chatInput.value.trim();
 
-            if (messageText !== "" && currentUserId) {
+            if ((messageText !== "" || selectedFile) && currentUserId) {
+                let imageUrl = null;
+
                 try {
+                    if (selectedFile) {
+                        // Upload image to Firebase Storage
+                        const storagePath = `artifacts/${appId}/public/data/images/${currentUserId}/${selectedFile.name}_${Date.now()}`;
+                        const storageRef = ref(storage, storagePath);
+                        await uploadBytes(storageRef, selectedFile);
+                        imageUrl = await getDownloadURL(storageRef);
+                    }
+
+                    // Add message to Firestore
                     const messagesCollection = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
                     await addDoc(messagesCollection, {
                         text: messageText,
+                        imageUrl: imageUrl,
                         senderId: currentUserId,
                         timestamp: serverTimestamp()
                     });
+
+                    // Clear input and preview
                     chatInput.value = '';
+                    selectedFile = null;
+                    imageUpload.value = '';
+                    imagePreviewContainer.style.display = 'none';
                     chatInput.focus();
+
                 } catch (error) {
-                    console.error("Mesaj göndərmə xətası:", error);
+                    console.error("Error sending message:", error);
                 }
             }
         });
 
-        // Firestore-da mesajları real vaxtda dinləyirik
+        // Listen for real-time messages from Firestore
         function setupRealtimeListener() {
             if (!currentUserId) {
                 return;
             }
 
             const messagesCollection = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
-            const q = query(messagesCollection, orderBy('timestamp', 'desc'));
+            const q = query(messagesCollection);
 
             onSnapshot(q, (querySnapshot) => {
                 loadingText.style.display = 'none';
@@ -212,27 +296,50 @@
                     noMessages.className = 'info-text';
                     messageListContainer.appendChild(noMessages);
                 } else {
+                    const messages = [];
                     querySnapshot.forEach((doc) => {
-                        const message = doc.data();
+                        messages.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+
+                    // Sort messages by timestamp
+                    messages.sort((a, b) => {
+                        if (a.timestamp && b.timestamp) {
+                            return b.timestamp.toMillis() - a.timestamp.toMillis();
+                        }
+                        return 0;
+                    });
+
+                    // Display sorted messages
+                    messages.forEach((message) => {
                         const messageDiv = document.createElement('div');
-                        messageDiv.className = `message ${message.senderId === currentUserId ? 'my-message' : 'other-message'}`;
+                        messageDiv.className = `message ${message.senderId === currentUserId ? 'message-self' : 'message-other'}`;
                         
-                        // Göndərənin ID-sini göstəririk
-                        const senderSpan = document.createElement('span');
-                        senderSpan.className = 'message-sender';
-                        senderSpan.textContent = `Göndərən: ${message.senderId}`;
-                        messageDiv.appendChild(senderSpan);
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'message-content';
 
-                        // Mesaj mətnini göstəririk
-                        const textP = document.createElement('p');
-                        textP.textContent = message.text;
-                        messageDiv.appendChild(textP);
+                        if (message.imageUrl) {
+                            const image = document.createElement('img');
+                            image.src = message.imageUrl;
+                            image.className = 'message-image';
+                            image.alt = 'Yüklənmiş şəkil';
+                            contentDiv.appendChild(image);
+                        }
 
+                        if (message.text) {
+                            const textP = document.createElement('p');
+                            textP.textContent = message.text;
+                            contentDiv.appendChild(textP);
+                        }
+                        
+                        messageDiv.appendChild(contentDiv);
                         messageListContainer.appendChild(messageDiv);
                     });
                 }
             }, (error) => {
-                console.error("Mesajları yükləmə zamanı xəta:", error);
+                console.error("Error loading messages:", error);
                 loadingText.textContent = 'Mesajlar yüklənərkən xəta baş verdi.';
             });
         }
