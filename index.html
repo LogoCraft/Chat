@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonim Chat Otağı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e5e7eb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+        .chat-header {
+            background-color: #1f2937;
+            color: #ffffff;
+            padding: 1rem;
+            text-align: center;
+        }
+        .message-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 1rem;
+        }
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 1.25rem;
+            animation: fadeIn 0.5s ease-out;
+            word-wrap: break-word;
+        }
+        .my-message {
+            background-color: #3b82f6;
+            color: #ffffff;
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+        .other-message {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+        }
+        .message-sender {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+        .chat-input-form {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+        .chat-input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid #d1d5db;
+            outline: none;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .chat-input:focus {
+            border-color: #2563eb;
+        }
+        .chat-send-btn {
+            background-color: #2563eb;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            margin-left: 0.5rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .chat-send-btn:hover {
+            background-color: #1e40af;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .info-text {
+            padding: 1rem;
+            text-align: center;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-header">
+            <h1 class="text-2xl font-bold">Anonim Chat Otağı</h1>
+            <p id="user-id-display" class="text-sm mt-1"></p>
+        </div>
+
+        <div id="message-list-container" class="message-list">
+            <p id="loading-text" class="info-text">Mesajlar yüklənir...</p>
+        </div>
+
+        <form id="chat-form" class="chat-input-form">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Mesajınızı yazın..." required />
+            <button type="submit" class="chat-send-btn">Göndər</button>
+        </form>
+    </div>
+
+    <!-- Firebase SDK Skriptləri -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firestore debug loglarını aktivləşdiririk
+        setLogLevel('debug');
+
+        // Global dəyişənləri müəyyən edirik
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Elementləri seçirik
+        const messageListContainer = document.getElementById('message-list-container');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const loadingText = document.getElementById('loading-text');
+
+        // Firebase tətbiqini başladırıq
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentUserId = null;
+
+        // İstifadəçinin avtorizasiya vəziyyətini izləyirik
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                userIdDisplay.textContent = `Sizin ID-niz: ${currentUserId}`;
+                loadingText.textContent = 'Mesajlar yüklənir...';
+                setupRealtimeListener();
+            } else {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Giriş zamanı xəta:", error);
+                    loadingText.textContent = 'Mesajlar yüklənə bilmədi. Xahiş edirik yenidən cəhd edin.';
+                }
+            }
+        });
+
+        // Mesaj göndərmə funksiyası
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const messageText = chatInput.value.trim();
+
+            if (messageText !== "" && currentUserId) {
+                try {
+                    const messagesCollection = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
+                    await addDoc(messagesCollection, {
+                        text: messageText,
+                        senderId: currentUserId,
+                        timestamp: serverTimestamp()
+                    });
+                    chatInput.value = '';
+                    chatInput.focus();
+                } catch (error) {
+                    console.error("Mesaj göndərmə xətası:", error);
+                }
+            }
+        });
+
+        // Firestore-da mesajları real vaxtda dinləyirik
+        function setupRealtimeListener() {
+            if (!currentUserId) {
+                return;
+            }
+
+            const messagesCollection = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
+            const q = query(messagesCollection, orderBy('timestamp', 'desc'));
+
+            onSnapshot(q, (querySnapshot) => {
+                loadingText.style.display = 'none';
+                messageListContainer.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    const noMessages = document.createElement('p');
+                    noMessages.textContent = 'Hələ heç bir mesaj yoxdur.';
+                    noMessages.className = 'info-text';
+                    messageListContainer.appendChild(noMessages);
+                } else {
+                    querySnapshot.forEach((doc) => {
+                        const message = doc.data();
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = `message ${message.senderId === currentUserId ? 'my-message' : 'other-message'}`;
+                        
+                        // Göndərənin ID-sini göstəririk
+                        const senderSpan = document.createElement('span');
+                        senderSpan.className = 'message-sender';
+                        senderSpan.textContent = `Göndərən: ${message.senderId}`;
+                        messageDiv.appendChild(senderSpan);
+
+                        // Mesaj mətnini göstəririk
+                        const textP = document.createElement('p');
+                        textP.textContent = message.text;
+                        messageDiv.appendChild(textP);
+
+                        messageListContainer.appendChild(messageDiv);
+                    });
+                }
+            }, (error) => {
+                console.error("Mesajları yükləmə zamanı xəta:", error);
+                loadingText.textContent = 'Mesajlar yüklənərkən xəta baş verdi.';
+            });
+        }
+    </script>
+</body>
+</html>
