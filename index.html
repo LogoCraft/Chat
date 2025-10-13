@@ -3,155 +3,450 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Muchat</title>
-    <!-- Tailwind CSS üçün CDN -->
+    <title>Masroxx Layihə İdarəetmə Paneli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
+            background: #1a202c; /* Tünd fon rəngi */
+            color: #e2e8f0; /* Açıq mətn rəngi */
+        }
+        /* Custom scrollbar for task list */
+        #taskListContainer::-webkit-scrollbar {
+            width: 6px;
+        }
+        #taskListContainer::-webkit-scrollbar-thumb {
+            background-color: #374151;
+            border-radius: 3px;
+        }
+        #taskListContainer::-webkit-scrollbar-track {
+            background-color: #1f2937;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="flex items-start md:items-center justify-center min-h-screen p-4 md:p-8">
 
-    <!-- Əsas söhbət konteyneri -->
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col h-[80vh]">
-        <!-- Başlıq hissəsi -->
-        <div class="p-4 bg-purple-600 text-white text-center rounded-t-2xl">
-            <h1 class="text-2xl font-bold">Muchat</h1>
-            <p class="text-sm mt-1">Hər kəsin görə biləcəyi ümumi söhbət.</p>
-        </div>
+    <!-- Əsas Kapsayıcı (Container) -->
+    <div id="appContainer" class="w-full max-w-4xl bg-gray-800 rounded-2xl shadow-2xl overflow-hidden min-h-[70vh]">
 
-        <!-- Mesajların göstərildiyi yer -->
-        <div id="messages" class="flex-grow p-4 space-y-3 overflow-y-auto">
-            <!-- Mesajlar buraya dinamik əlavə olunacaq -->
-        </div>
-
-        <!-- Mesaj göndərmə sahəsi -->
-        <div class="p-4 bg-gray-100 flex items-center gap-2 border-t border-gray-200">
-            <input type="text" id="messageInput" placeholder="Mesajınızı yazın..." class="flex-grow px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
-            <button id="sendBtn" class="bg-purple-600 text-white p-2 rounded-full shadow-lg hover:bg-purple-700 transition duration-300 ease-in-out">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
-                </svg>
+        <!-- Başlıq -->
+        <header class="bg-gray-700 text-center py-6 px-4 flex justify-between items-center">
+            <h1 id="pageTitle" class="text-2xl md:text-3xl font-bold text-white transition-all duration-300">Xoş gəlmisiniz!</h1>
+            <button id="logoutBtn" onclick="logout()" 
+                    class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 text-sm hidden">
+                Çıxış
             </button>
+        </header>
+
+        <!-- Forma Bölməsi (Login/Registration) -->
+        <main id="authSection" class="p-4 md:p-8 space-y-6 transition-all duration-500 ease-in-out w-full md:w-1/2 mx-auto">
+            <h2 id="formTitle" class="text-2xl font-semibold text-center text-gray-100">Giriş</h2>
+
+            <form id="authForm" class="space-y-4">
+                <div>
+                    <label for="email" class="sr-only">Email</label>
+                    <input type="email" id="email" placeholder="Email" required
+                            class="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300">
+                </div>
+                <div>
+                    <label for="password" class="sr-only">Şifrə</label>
+                    <input type="password" id="password" placeholder="Şifrə" required
+                            class="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300">
+                </div>
+                <button type="submit" id="submitBtn"
+                        class="w-full py-3 mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition-all duration-300 ease-in-out disabled:opacity-50" disabled>
+                    Daxil ol
+                </button>
+                <p id="loadingMessage" class="text-center text-sm text-gray-400 hidden">Yüklənir...</p>
+            </form>
+
+            <div class="text-center">
+                <p id="toggleText" class="text-sm text-gray-400">
+                    Hesabın yoxdur? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Qeydiyyat et</a>
+                </p>
+            </div>
+        </main>
+
+        <!-- Əsas Layihə Paneli (SaaS Feature) -->
+        <main id="homeSection" class="hidden p-4 md:p-8 space-y-8">
+            
+            <div class="flex flex-col md:flex-row md:space-x-8 space-y-8 md:space-y-0">
+                
+                <!-- Tapşırıq Əlavə Etmə Forması -->
+                <div class="md:w-1/3 p-6 bg-gray-700 rounded-xl shadow-lg h-fit">
+                    <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-circle text-emerald-400 mr-2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                        Yeni Tapşırıq Əlavə Et
+                    </h3>
+                    <form id="taskForm" class="space-y-4">
+                        <input type="text" id="taskName" placeholder="Tapşırığın adı (Məs: Ana Səhifə Dizaynı)" required
+                                class="w-full px-4 py-3 bg-gray-800 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300">
+                        <textarea id="taskDescription" placeholder="Qısa təsvir..."
+                                class="w-full px-4 py-3 bg-gray-800 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300 h-24"></textarea>
+                        <button type="submit" 
+                                class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition-all duration-300 ease-in-out">
+                            Tapşırığı Saxla
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Tapşırıq Siyahısı -->
+                <div class="md:w-2/3 p-6 bg-gray-700 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list text-emerald-400 mr-2"><rect width="8" height="4" x="8" y="2"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+                        Aktiv Tapşırıqlar
+                    </h3>
+                    <div id="taskListContainer" class="space-y-3 max-h-[50vh] overflow-y-auto">
+                        <!-- Tapşırıqlar bura yerləşəcək -->
+                        <p id="noTasksMessage" class="text-gray-400 text-center py-8">Hazırda aktiv tapşırıq yoxdur.</p>
+                        <div id="loadingTasks" class="text-center text-gray-400 py-4 hidden">Tapşırıqlar yüklənir...</div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="mt-8 pt-4 border-t border-gray-700 text-sm text-gray-400 text-center">
+                <p id="userStatusDisplay" class="text-sm text-gray-400"></p>
+                <p class="text-xs mt-1">Siz daxil olmusunuz. Məlumatlarınız real-vaxt rejimində Firestore-da saxlanılır.</p>
+            </div>
+        </main>
+
+        <!-- Mesaj Qutusu (Error/Success) -->
+        <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center p-4 z-50">
+            <div class="bg-gray-700 text-white p-6 rounded-xl shadow-2xl text-center max-w-xs w-full transform transition-all duration-300 scale-100">
+                <p id="messageText" class="text-lg mb-4"></p>
+                <button onclick="hideMessage()" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold">Bağla</button>
+            </div>
         </div>
-        
-        <!-- İstifadəçi ID hissəsi -->
-        <div class="p-2 bg-gray-200 text-center text-xs text-gray-600">
-            <span id="userId"></span>
-        </div>
+
     </div>
 
-    <!-- Firebase SDK importları -->
+    <!-- Firebase SDK Imports -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, Timestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Variables
+        let db;
+        let auth;
+        let currentUserId = null;
+        let isAuthReady = false;
         
-        // Firestore üçün global dəyişənlər
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Canvas tərəfindən təmin edilən qlobal dəyişənləri istifadə edirik
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-masroxx-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        let db, auth, userId = 'Yüklənir...';
+        // UI Elementləri
+        const authForm = document.getElementById('authForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const authSection = document.getElementById('authSection');
+        const homeSection = document.getElementById('homeSection');
+        const formTitle = document.getElementById('formTitle');
+        const submitBtn = document.getElementById('submitBtn');
+        const toggleLink = document.getElementById('toggleLink');
+        const toggleText = document.getElementById('toggleText');
+        const pageTitle = document.getElementById('pageTitle');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userStatusDisplay = document.getElementById('userStatusDisplay');
+        const taskForm = document.getElementById('taskForm');
+        const taskListContainer = document.getElementById('taskListContainer');
+        const taskNameInput = document.getElementById('taskName');
+        const taskDescriptionInput = document.getElementById('taskDescription');
+        const noTasksMessage = document.getElementById('noTasksMessage');
+        const loadingTasks = document.getElementById('loadingTasks');
+        const loadingMessage = document.getElementById('loadingMessage');
+        
+        let isLoginMode = true;
 
-        // Firebase tətbiqini yüklə
-        if (firebaseConfig) {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
+        // Mesaj Qutusu Funksiyaları
+        function showMessage(msg, type = 'success') {
+            const messageBox = document.getElementById('messageBox');
+            const messageText = document.getElementById('messageText');
+            messageText.innerText = msg;
             
-            // İstifadəçinin avtorizasiyası
-            (async () => {
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                    userId = auth.currentUser?.uid || "Anonim istifadəçi";
-                    document.getElementById('userId').textContent = `Sizin ID: ${userId}`;
-                    initChat();
-                } catch (error) {
-                    console.error("Firebase avtorizasiya xətası:", error);
-                    document.getElementById('userId').textContent = 'Avtorizasiya xətası';
-                }
-            })();
-        } else {
-            console.error("Firebase konfiqurasiya məlumatları tapılmadı.");
+            // Rənginə görə mesajın növünü dəyişdirə bilərik
+            const boxContent = messageBox.querySelector('.bg-gray-700');
+            boxContent.classList.remove('bg-red-700', 'bg-emerald-700');
+            if (type === 'error') {
+                boxContent.classList.add('bg-red-700');
+            } else {
+                boxContent.classList.add('bg-gray-700');
+            }
+
+            messageBox.classList.remove('hidden');
+            messageBox.classList.add('flex');
         }
 
-        // Söhbət funksiyasını işə sal
-        function initChat() {
-            if (!db) {
-                console.error("Firestore məlumat bazası mövcud deyil.");
+        window.hideMessage = function() {
+            document.getElementById('messageBox').classList.remove('flex');
+            document.getElementById('messageBox').classList.add('hidden');
+        }
+
+        // --- Firebase İcazə Funksiyaları ---
+
+        async function initFirebase() {
+            try {
+                // Hər hansı bir xəta olarsa konsola yazılması üçün
+                setLogLevel('Debug');
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // İstifadəçini verilmiş token ilə və ya anonim daxil etmək
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // İstifadəçi statusunun dəyişməsini dinləmək
+                onAuthStateChanged(auth, (user) => {
+                    currentUserId = user ? user.uid : null;
+                    isAuthReady = true;
+                    updateAppUI(user);
+                    if (user) {
+                        // İstifadəçi daxil olduqdan sonra tapşırıqları dinləməyə başlayırıq
+                        listenForTasks(); 
+                    }
+                });
+
+                submitBtn.disabled = false; // Firebase hazır olduqda düyməni aktivləşdir
+                loadingMessage.classList.add('hidden');
+            } catch (error) {
+                console.error("Firebase tətbiqi başlanarkən xəta: ", error);
+                showMessage("Tətbiq başlanarkən xəta: " + error.message, 'error');
+                submitBtn.innerText = "Xəta: Təkrar cəhd edin";
+            }
+        }
+
+        // UI-ı istifadəçinin statusuna görə güncəlləyən funksiya
+        function updateAppUI(user) {
+            if (user && user.email) {
+                // Daxil olub
+                authSection.classList.add('hidden');
+                homeSection.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                pageTitle.innerText = "Masroxx Paneli";
+                userStatusDisplay.innerHTML = `<span class="font-bold text-white">${user.email}</span> olaraq daxil oldunuz. ID: <span class="text-emerald-400">${currentUserId}</span>`;
+            } else {
+                // Daxil olmayıb
+                authSection.classList.remove('hidden');
+                homeSection.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
+                pageTitle.innerText = "Xoş gəlmisiniz!";
+                updateFormUI(); // Formanın login/qeydiyyat vəziyyətini yenilə
+            }
+        }
+
+        // Qeydiyyat
+        async function register(email, password) {
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showMessage("Qeydiyyat uğurludur! Avtomatik daxil oldunuz.");
+                // onAuthStateChanged avtomatik UI-ı güncəlləyəcək
+            } catch (error) {
+                console.error("Qeydiyyat xətası:", error);
+                showMessage("Qeydiyyat uğursuz oldu: " + error.message, 'error');
+            }
+        }
+
+        // Giriş
+        async function login(email, password) {
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessage("Daxil olma uğurludur!");
+                // onAuthStateChanged avtomatik UI-ı güncəlləyəcək
+            } catch (error) {
+                console.error("Giriş xətası:", error);
+                showMessage("Giriş uğursuz oldu: Email və ya şifrə yanlışdır.", 'error');
+            }
+        }
+
+        // Çıxış
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                showMessage("Uğurla çıxış etdiniz.");
+                // onAuthStateChanged avtomatik UI-ı güncəlləyəcək
+            } catch (error) {
+                console.error("Çıxış xətası:", error);
+                showMessage("Çıxış zamanı xəta baş verdi.", 'error');
+            }
+        }
+
+        // --- Auth UI Logikası ---
+
+        // Formanın rejimini dəyişdir (login/qeydiyyat)
+        function updateFormUI() {
+            // Toggles between Login and Register views
+            if (isLoginMode) {
+                formTitle.innerText = "Giriş";
+                submitBtn.innerText = "Daxil ol";
+                toggleText.innerHTML = `Hesabın yoxdur? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Qeydiyyat et</a>`;
+            } else {
+                formTitle.innerText = "Qeydiyyat";
+                submitBtn.innerText = "Qeydiyyat et";
+                toggleText.innerHTML = `Artıq hesabın var? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Giriş et</a>`;
+            }
+            // Toggle linki yenidən təyin etməliyik, çünki innerHTML dəyişib
+            document.getElementById('toggleLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                isLoginMode = !isLoginMode;
+                updateFormUI();
+            });
+        }
+        
+        // Forma təqdim etmə hadisəsi
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            if (isLoginMode) {
+                login(email, password);
+            } else {
+                register(email, password);
+            }
+        });
+
+        // --- Firestore Məlumat Funksiyaları (Tapşırıqlar) ---
+
+        // Tapşırıq kolleksiyasının yolunu təyin edir (Şəxsi Məlumat)
+        function getTasksCollectionPath(userId) {
+            if (!userId || !appId) {
+                console.error("App ID və ya User ID mövcud deyil.");
+                return null;
+            }
+            // Şəxsi kolleksiya yolu: /artifacts/{appId}/users/{userId}/tasks
+            return `artifacts/${appId}/users/${userId}/tasks`;
+        }
+
+        // Tapşırıq əlavə etmə
+        taskForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId) return showMessage("Daxil olun və ya qeydiyyatdan keçin.", 'error');
+            
+            const name = taskNameInput.value.trim();
+            const description = taskDescriptionInput.value.trim();
+            const path = getTasksCollectionPath(currentUserId);
+
+            if (!name || !path) {
+                return showMessage("Tapşırıq adı boş ola bilməz.", 'error');
+            }
+
+            try {
+                const docRef = await addDoc(collection(db, path), {
+                    name: name,
+                    description: description,
+                    createdAt: Timestamp.now(),
+                    completed: false
+                });
+                showMessage("Tapşırıq uğurla əlavə edildi!", 'success');
+                taskNameInput.value = '';
+                taskDescriptionInput.value = '';
+                console.log("Əlavə edilən sənəd ID: ", docRef.id);
+            } catch (error) {
+                console.error("Tapşırıq əlavə edilərkən xəta: ", error);
+                showMessage("Tapşırıq əlavə edilərkən xəta: " + error.message, 'error');
+            }
+        });
+
+        // Tapşırıq silmə
+        window.deleteTask = async function(taskId) {
+            if (!currentUserId || !confirm("Tapşırığı silmək istədiyinizə əminsiniz?")) return;
+
+            const path = getTasksCollectionPath(currentUserId);
+            if (!path) return;
+            
+            try {
+                const taskDocRef = doc(db, path, taskId);
+                await deleteDoc(taskDocRef);
+                showMessage("Tapşırıq silindi.", 'success');
+            } catch (error) {
+                console.error("Tapşırıq silinərkən xəta: ", error);
+                showMessage("Tapşırıq silinərkən xəta: " + error.message, 'error');
+            }
+        }
+        
+        // Tapşırıqları dinləmə (Real-vaxt yeniləmə)
+        let unsubscribeTasks = null;
+        function listenForTasks() {
+            if (!isAuthReady || !currentUserId || !db) {
                 return;
             }
 
-            // Elementləri tap
-            const messagesDiv = document.getElementById("messages");
-            const input = document.getElementById("messageInput");
-            const sendBtn = document.getElementById("sendBtn");
+            // Əgər əvvəlki dinləyici varsa, onu dayandır
+            if (unsubscribeTasks) {
+                unsubscribeTasks();
+                unsubscribeTasks = null;
+            }
 
-            // Mesaj göndərmək
-            sendBtn.onclick = async () => {
-                const text = input.value.trim();
-                if (text && userId) {
-                    const messageData = {
-                        text: text,
-                        userId: userId,
-                        timestamp: serverTimestamp() // Firestore-da server vaxtından istifadə
-                    };
+            const path = getTasksCollectionPath(currentUserId);
+            if (!path) return;
 
-                    try {
-                        // Mesajı Firestore-a əlavə et
-                        const collectionPath = `artifacts/${appId}/public/data/messages`;
-                        await addDoc(collection(db, collectionPath), messageData);
-                        input.value = "";
-                        console.log("Mesaj uğurla göndərildi.");
-                    } catch (e) {
-                        console.error("Mesaj göndərilərkən xəta baş verdi: ", e);
-                    }
+            const tasksCollection = collection(db, path);
+            taskListContainer.innerHTML = '';
+            noTasksMessage.classList.add('hidden');
+            loadingTasks.classList.remove('hidden');
+
+            // onSnapshot istifadə edərək real-vaxt dinləmə
+            unsubscribeTasks = onSnapshot(tasksCollection, (snapshot) => {
+                loadingTasks.classList.add('hidden');
+                taskListContainer.innerHTML = ''; // Siyahını təmizlə
+
+                if (snapshot.empty) {
+                    noTasksMessage.classList.remove('hidden');
+                    return;
+                } else {
+                    noTasksMessage.classList.add('hidden');
                 }
-            };
-            
-            // Mesajları real-time dinləmək
-            const collectionPath = `artifacts/${appId}/public/data/messages`;
-            const messagesQuery = query(collection(db, collectionPath));
 
-            onSnapshot(messagesQuery, (querySnapshot) => {
-                // Mesajları təmizlə və yenidən yüklə
-                messagesDiv.innerHTML = '';
-                const sortedMessages = [];
-                querySnapshot.forEach((doc) => {
-                    sortedMessages.push(doc.data());
-                });
-
-                // Vaxta görə sırala (Firestore-da serverTimestamp ilə)
-                sortedMessages.sort((a, b) => a.timestamp - b.timestamp);
-
-                sortedMessages.forEach(msg => {
-                    const div = document.createElement("div");
-                    div.className = "p-3 rounded-lg max-w-xs text-sm break-words";
-                    // İstifadəçi ID-sinə görə rəng seçimi
-                    const isMyMessage = msg.userId === userId;
-                    if (isMyMessage) {
-                        div.classList.add("bg-purple-500", "text-white", "ml-auto");
-                    } else {
-                        div.classList.add("bg-gray-200", "text-gray-800", "mr-auto");
-                    }
+                snapshot.forEach((doc) => {
+                    const task = doc.data();
+                    const taskId = doc.id;
+                    const taskElement = document.createElement('div');
                     
-                    const senderId = msg.userId.substring(0, 8); // Tam ID-nin hamısı yox, qısa hissəsi
-                    div.innerHTML = `<span class="font-bold text-xs opacity-75">${senderId}</span> <br> ${msg.text}`;
-                    messagesDiv.appendChild(div);
-                });
+                    // Vaxtı formatlama
+                    const date = task.createdAt ? task.createdAt.toDate().toLocaleDateString('az-AZ', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Naməlum vaxt';
 
-                // Söhbəti aşağıya sürüşdür
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                    taskElement.className = 'flex items-start justify-between p-4 bg-gray-800 rounded-xl shadow-md border-l-4 border-emerald-500 hover:bg-gray-700 transition-colors duration-200';
+                    taskElement.innerHTML = `
+                        <div class="flex-1 min-w-0 pr-4">
+                            <p class="text-lg font-semibold text-white truncate">${task.name}</p>
+                            <p class="text-sm text-gray-400 mt-1 break-words">${task.description || 'Təsvir yoxdur.'}</p>
+                            <p class="text-xs text-gray-500 mt-2">Əlavə edilmə: ${date}</p>
+                        </div>
+                        <div class="flex items-center space-x-2 flex-shrink-0">
+                            <!-- Silmə düyməsi -->
+                            <button onclick="deleteTask('${taskId}')" class="text-red-400 hover:text-red-500 p-2 rounded-full transition-colors duration-200" title="Sil">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                            </button>
+                        </div>
+                    `;
+                    taskListContainer.appendChild(taskElement);
+                });
+            }, (error) => {
+                console.error("Tapşırıq dinlənilərkən xəta: ", error);
+                loadingTasks.classList.add('hidden');
+                noTasksMessage.classList.remove('hidden');
+                noTasksMessage.innerText = "Məlumatı yükləmək mümkün olmadı: " + error.message;
             });
         }
+        
+        // Səhifə yüklənəndə Firebase-i başla
+        window.onload = function () {
+            // Başlanğıcda düyməni deaktiv et və yükləmə mesajını göstər
+            submitBtn.disabled = true;
+            loadingMessage.classList.remove('hidden');
+            
+            initFirebase();
+            updateFormUI(); // Linkin click hadisəsini düzgün təyin etmək üçün
+        }
+
     </script>
 </body>
 </html>
