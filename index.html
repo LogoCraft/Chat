@@ -1,10 +1,12 @@
+Giriş sistemi
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masroxx Layihə İdarəetmə Paneli</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Masroxx Login & Qeydiyyat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -12,53 +14,37 @@
             background: #1a202c; /* Tünd fon rəngi */
             color: #e2e8f0; /* Açıq mətn rəngi */
         }
-        /* Custom scrollbar for task list */
-        #taskListContainer::-webkit-scrollbar {
-            width: 6px;
-        }
-        #taskListContainer::-webkit-scrollbar-thumb {
-            background-color: #374151;
-            border-radius: 3px;
-        }
-        #taskListContainer::-webkit-scrollbar-track {
-            background-color: #1f2937;
-        }
     </style>
 </head>
-<body class="flex items-start md:items-center justify-center min-h-screen p-4 md:p-8">
+<body class="flex items-center justify-center min-h-screen p-4">
 
     <!-- Əsas Kapsayıcı (Container) -->
-    <div id="appContainer" class="w-full max-w-4xl bg-gray-800 rounded-2xl shadow-2xl overflow-hidden min-h-[70vh]">
+    <div id="app" class="w-full max-w-md bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
 
         <!-- Başlıq -->
-        <header class="bg-gray-700 text-center py-6 px-4 flex justify-between items-center">
-            <h1 id="pageTitle" class="text-2xl md:text-3xl font-bold text-white transition-all duration-300">Xoş gəlmisiniz!</h1>
-            <button id="logoutBtn" onclick="logout()" 
-                    class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 text-sm hidden">
-                Çıxış
-            </button>
+        <header class="bg-gray-700 text-center py-6 px-4">
+            <h1 id="pageTitle" class="text-3xl font-bold text-white">Xoş gəlmisiniz!</h1>
         </header>
 
         <!-- Forma Bölməsi (Login/Registration) -->
-        <main id="authSection" class="p-4 md:p-8 space-y-6 transition-all duration-500 ease-in-out w-full md:w-1/2 mx-auto">
+        <main id="authFormSection" class="p-8 space-y-6 transition-transform duration-500 ease-in-out">
             <h2 id="formTitle" class="text-2xl font-semibold text-center text-gray-100">Giriş</h2>
 
             <form id="authForm" class="space-y-4">
                 <div>
                     <label for="email" class="sr-only">Email</label>
                     <input type="email" id="email" placeholder="Email" required
-                            class="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300">
+                           class="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300">
                 </div>
                 <div>
                     <label for="password" class="sr-only">Şifrə</label>
                     <input type="password" id="password" placeholder="Şifrə" required
-                            class="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300">
+                           class="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300">
                 </div>
                 <button type="submit" id="submitBtn"
-                        class="w-full py-3 mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition-all duration-300 ease-in-out disabled:opacity-50" disabled>
+                        class="w-full py-3 mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition-all duration-300 ease-in-out">
                     Daxil ol
                 </button>
-                <p id="loadingMessage" class="text-center text-sm text-gray-400 hidden">Yüklənir...</p>
             </form>
 
             <div class="text-center">
@@ -68,404 +54,156 @@
             </div>
         </main>
 
-        <!-- Əsas Layihə Paneli (SaaS Feature) -->
-        <main id="homeSection" class="hidden p-4 md:p-8 space-y-8">
-            
-            <div class="flex flex-col md:flex-row md:space-x-8 space-y-8 md:space-y-0">
-                
-                <!-- Tapşırıq Əlavə Etmə Forması -->
-                <div class="md:w-1/3 p-6 bg-gray-700 rounded-xl shadow-lg h-fit">
-                    <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-circle text-emerald-400 mr-2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-                        Yeni Tapşırıq Əlavə Et
-                    </h3>
-                    <form id="taskForm" class="space-y-4">
-                        <input type="text" id="taskName" placeholder="Tapşırığın adı (Məs: Ana Səhifə Dizaynı)" required
-                                class="w-full px-4 py-3 bg-gray-800 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300">
-                        <textarea id="taskDescription" placeholder="Qısa təsvir..."
-                                class="w-full px-4 py-3 bg-gray-800 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300 h-24"></textarea>
-                        <button type="submit" 
-                                class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition-all duration-300 ease-in-out">
-                            Tapşırığı Saxla
-                        </button>
-                    </form>
-                </div>
-                
-                <!-- Tapşırıq Siyahısı -->
-                <div class="md:w-2/3 p-6 bg-gray-700 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-semibold text-white mb-4 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list text-emerald-400 mr-2"><rect width="8" height="4" x="8" y="2"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
-                        Aktiv Tapşırıqlar
-                    </h3>
-                    <div id="taskListContainer" class="space-y-3 max-h-[50vh] overflow-y-auto">
-                        <!-- Tapşırıqlar bura yerləşəcək -->
-                        <p id="noTasksMessage" class="text-gray-400 text-center py-8">Hazırda aktiv tapşırıq yoxdur.</p>
-                        <div id="loadingTasks" class="text-center text-gray-400 py-4 hidden">Tapşırıqlar yüklənir...</div>
-                    </div>
-                </div>
-
+        <!-- Əsas səhifə görünüşü -->
+        <main id="homeSection" class="hidden p-8 space-y-6">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-emerald-400">Xoş gəldiniz! 🎉</h2>
+                <p id="userEmailDisplay" class="text-lg text-gray-300 mt-2"></p>
+                <p class="text-sm text-gray-400">Bu sizin əsas səhifənizdir.</p>
             </div>
-            
-            <div class="mt-8 pt-4 border-t border-gray-700 text-sm text-gray-400 text-center">
-                <p id="userStatusDisplay" class="text-sm text-gray-400"></p>
-                <p class="text-xs mt-1">Siz daxil olmusunuz. Məlumatlarınız real-vaxt rejimində Firestore-da saxlanılır.</p>
+            <div class="mt-8 text-center">
+                <button onclick="logout()"
+                        class="py-3 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition-all duration-300 ease-in-out">
+                    Çıxış
+                </button>
             </div>
         </main>
 
-        <!-- Mesaj Qutusu (Error/Success) -->
-        <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center p-4 z-50">
-            <div class="bg-gray-700 text-white p-6 rounded-xl shadow-2xl text-center max-w-xs w-full transform transition-all duration-300 scale-100">
+        <!-- Mesaj Qutusu -->
+        <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+            <div class="bg-gray-700 text-white p-6 rounded-xl shadow-2xl text-center max-w-xs w-full">
                 <p id="messageText" class="text-lg mb-4"></p>
-                <button onclick="hideMessage()" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold">Bağla</button>
+                <button onclick="hideMessage()" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg">Bağla</button>
             </div>
         </div>
-
     </div>
 
-    <!-- Firebase SDK Imports -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, Timestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global Variables
-        let db;
-        let auth;
-        let currentUserId = null;
-        let isAuthReady = false;
-        
-        // Canvas tərəfindən təmin edilən qlobal dəyişənləri istifadə edirik
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-masroxx-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // UI Elementləri
-        const authForm = document.getElementById('authForm');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const authSection = document.getElementById('authSection');
+    <script>
+        const app = document.getElementById('app');
+        const authFormSection = document.getElementById('authFormSection');
         const homeSection = document.getElementById('homeSection');
         const formTitle = document.getElementById('formTitle');
         const submitBtn = document.getElementById('submitBtn');
-        const toggleLink = document.getElementById('toggleLink');
         const toggleText = document.getElementById('toggleText');
+        const toggleLink = document.getElementById('toggleLink');
         const pageTitle = document.getElementById('pageTitle');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const userStatusDisplay = document.getElementById('userStatusDisplay');
-        const taskForm = document.getElementById('taskForm');
-        const taskListContainer = document.getElementById('taskListContainer');
-        const taskNameInput = document.getElementById('taskName');
-        const taskDescriptionInput = document.getElementById('taskDescription');
-        const noTasksMessage = document.getElementById('noTasksMessage');
-        const loadingTasks = document.getElementById('loadingTasks');
-        const loadingMessage = document.getElementById('loadingMessage');
-        
-        let isLoginMode = true;
+        const userEmailDisplay = document.getElementById('userEmailDisplay');
 
-        // Mesaj Qutusu Funksiyaları
-        function showMessage(msg, type = 'success') {
-            const messageBox = document.getElementById('messageBox');
-            const messageText = document.getElementById('messageText');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+
+        let isLogin = true;
+
+        // Mesaj qutusunu göstər
+        function showMessage(msg) {
             messageText.innerText = msg;
-            
-            // Rənginə görə mesajın növünü dəyişdirə bilərik
-            const boxContent = messageBox.querySelector('.bg-gray-700');
-            boxContent.classList.remove('bg-red-700', 'bg-emerald-700');
-            if (type === 'error') {
-                boxContent.classList.add('bg-red-700');
-            } else {
-                boxContent.classList.add('bg-gray-700');
-            }
-
             messageBox.classList.remove('hidden');
             messageBox.classList.add('flex');
         }
 
-        window.hideMessage = function() {
-            document.getElementById('messageBox').classList.remove('flex');
-            document.getElementById('messageBox').classList.add('hidden');
+        // Mesaj qutusunu gizlət
+        function hideMessage() {
+            messageBox.classList.remove('flex');
+            messageBox.classList.add('hidden');
         }
-
-        // --- Firebase İcazə Funksiyaları ---
-
-        async function initFirebase() {
-            try {
-                // Hər hansı bir xəta olarsa konsola yazılması üçün
-                setLogLevel('Debug');
-                
-                // Konfiqurasiya yoxlaması (auth/invalid-api-key xətasını tutmaq üçün)
-                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
-                    console.error("Firebase Konfiqurasiya Xətası: API Key yoxdur və ya yanlışdır.");
-                    submitBtn.innerText = "Konfiqurasiya Xətası";
-                    showMessage("Tətbiq başlanarkən ciddi xəta: Firebase API Key yanlışdır. Bu, platforma tənzimləməsi ilə bağlıdır.", 'error');
-                    return; // Konfiqurasiya yoxdursa davam etmə
-                }
-
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                // İstifadəçini verilmiş token ilə və ya anonim daxil etmək
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // İstifadəçi statusunun dəyişməsini dinləmək
-                onAuthStateChanged(auth, (user) => {
-                    currentUserId = user ? user.uid : null;
-                    isAuthReady = true;
-                    updateAppUI(user);
-                    if (user) {
-                        // İstifadəçi daxil olduqdan sonra tapşırıqları dinləməyə başlayırıq
-                        listenForTasks(); 
-                    }
-                });
-
-                submitBtn.disabled = false; // Firebase hazır olduqda düyməni aktivləşdir
-                loadingMessage.classList.add('hidden');
-            } catch (error) {
-                console.error("Firebase tətbiqi başlanarkən xəta: ", error);
-                showMessage("Tətbiq başlanarkən xəta: " + error.message, 'error');
-                submitBtn.innerText = "Xəta: Təkrar cəhd edin";
-            }
-        }
-
-        // UI-ı istifadəçinin statusuna görə güncəlləyən funksiya
-        function updateAppUI(user) {
-            if (user && user.email) {
-                // Daxil olub
-                authSection.classList.add('hidden');
-                homeSection.classList.remove('hidden');
-                logoutBtn.classList.remove('hidden');
-                pageTitle.innerText = "Masroxx Paneli";
-                userStatusDisplay.innerHTML = `<span class="font-bold text-white">${user.email}</span> olaraq daxil oldunuz. ID: <span class="text-emerald-400">${currentUserId}</span>`;
-            } else {
-                // Daxil olmayıb
-                authSection.classList.remove('hidden');
-                homeSection.classList.add('hidden');
-                logoutBtn.classList.add('hidden');
-                pageTitle.innerText = "Xoş gəlmisiniz!";
-                updateFormUI(); // Formanın login/qeydiyyat vəziyyətini yenilə
-            }
-        }
-
-        // Qeydiyyat
-        async function register(email, password) {
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                showMessage("Qeydiyyat uğurludur! Avtomatik daxil oldunuz.");
-                // onAuthStateChanged avtomatik UI-ı güncəlləyəcək
-            } catch (error) {
-                console.error("Qeydiyyat xətası:", error);
-                let errorMessage = "Qeydiyyat uğursuz oldu: " + error.message;
-
-                // Xüsusi olaraq 'auth/operation-not-allowed' xətasını yoxlayırıq (Sizin xətanız)
-                if (error.code === 'auth/operation-not-allowed') {
-                    errorMessage = "Qeydiyyat uğursuz oldu: **Email/Şifrə ilə giriş metodu Firebase Konsolunda AKTİV DEYİL.** Zəhmət olmasa, **Authentication -> Sign-in method** bölməsində aktivləşdirin.";
-                } else if (error.code === 'auth/weak-password') {
-                    errorMessage = "Şifrə çox zəifdir. Ən azı 6 simvol olmalıdır.";
-                }
-
-                showMessage(errorMessage, 'error');
-            }
-        }
-
-        // Giriş
-        async function login(email, password) {
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                showMessage("Daxil olma uğurludur!");
-                // onAuthStateChanged avtomatik UI-ı güncəlləyəcək
-            } catch (error) {
-                console.error("Giriş xətası:", error);
-                showMessage("Giriş uğursuz oldu: Email və ya şifrə yanlışdır.", 'error');
-            }
-        }
-
-        // Çıxış
-        window.logout = async function() {
-            try {
-                await signOut(auth);
-                showMessage("Uğurla çıxış etdiniz.");
-                // onAuthStateChanged avtomatik UI-ı güncəlləyəcək
-            } catch (error) {
-                console.error("Çıxış xətası:", error);
-                showMessage("Çıxış zamanı xəta baş verdi.", 'error');
-            }
-        }
-
-        // --- Auth UI Logikası ---
 
         // Formanın rejimini dəyişdir (login/qeydiyyat)
-        function updateFormUI() {
-            // Toggles between Login and Register views
-            if (isLoginMode) {
+        toggleLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLogin = !isLogin;
+            if (isLogin) {
                 formTitle.innerText = "Giriş";
                 submitBtn.innerText = "Daxil ol";
-                toggleText.innerHTML = `Hesabın yoxdur? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Qeydiyyat et</a>`;
+                toggleText.innerHTML = Hesabın yoxdur? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Qeydiyyat et</a>;
             } else {
                 formTitle.innerText = "Qeydiyyat";
                 submitBtn.innerText = "Qeydiyyat et";
-                toggleText.innerHTML = `Artıq hesabın var? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Giriş et</a>`;
+                toggleText.innerHTML = Artıq hesabın var? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Giriş et</a>;
             }
-            // Toggle linki yenidən təyin etməliyik, çünki innerHTML dəyişib
+            // Səhifəni yenidən yükləməyin qarşısını almaq üçün event listener-ı yenidən təyin et
             document.getElementById('toggleLink').addEventListener('click', (e) => {
                 e.preventDefault();
-                isLoginMode = !isLoginMode;
+                isLogin = !isLogin;
+                updateFormUI();
+            });
+        });
+
+        // UI-ı güncəlləyən funksiya
+        function updateFormUI() {
+            if (isLogin) {
+                formTitle.innerText = "Giriş";
+                submitBtn.innerText = "Daxil ol";
+                toggleText.innerHTML = Hesabın yoxdur? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Qeydiyyat et</a>;
+            } else {
+                formTitle.innerText = "Qeydiyyat";
+                submitBtn.innerText = "Qeydiyyat et";
+                toggleText.innerHTML = Artıq hesabın var? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Giriş et</a>;
+            }
+            // Səhifəni yenidən yükləməyin qarşısını almaq üçün event listener-ı yenidən təyin et
+            document.getElementById('toggleLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                isLogin = !isLogin;
                 updateFormUI();
             });
         }
-        
-        // Forma təqdim etmə hadisəsi
-        authForm.addEventListener('submit', (e) => {
+
+        // Formanı təqdim etmə (submit) hadisəsi
+        document.getElementById('authForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            
-            if (isLoginMode) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (isLogin) {
                 login(email, password);
             } else {
                 register(email, password);
             }
         });
 
-        // --- Firestore Məlumat Funksiyaları (Tapşırıqlar) ---
-
-        // Tapşırıq kolleksiyasının yolunu təyin edir (Şəxsi Məlumat)
-        function getTasksCollectionPath(userId) {
-            if (!userId || !appId) {
-                console.error("App ID və ya User ID mövcud deyil.");
-                return null;
-            }
-            // Şəxsi kolleksiya yolu: /artifacts/{appId}/users/{userId}/tasks
-            return `artifacts/${appId}/users/${userId}/tasks`;
-        }
-
-        // Tapşırıq əlavə etmə
-        taskForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentUserId) return showMessage("Daxil olun və ya qeydiyyatdan keçin.", 'error');
-            
-            const name = taskNameInput.value.trim();
-            const description = taskDescriptionInput.value.trim();
-            const path = getTasksCollectionPath(currentUserId);
-
-            if (!name || !path) {
-                return showMessage("Tapşırıq adı boş ola bilməz.", 'error');
-            }
-
-            try {
-                const docRef = await addDoc(collection(db, path), {
-                    name: name,
-                    description: description,
-                    createdAt: Timestamp.now(),
-                    completed: false
-                });
-                showMessage("Tapşırıq uğurla əlavə edildi!", 'success');
-                taskNameInput.value = '';
-                taskDescriptionInput.value = '';
-                console.log("Əlavə edilən sənəd ID: ", docRef.id);
-            } catch (error) {
-                console.error("Tapşırıq əlavə edilərkən xəta: ", error);
-                showMessage("Tapşırıq əlavə edilərkən xəta: " + error.message, 'error');
-            }
-        });
-
-        // Tapşırıq silmə
-        window.deleteTask = async function(taskId) {
-            // QEYD: confirm() istifadəsi tövsiyə edilmir və custom modal ilə əvəz olunmalıdır.
-            if (!currentUserId || !confirm("Tapşırığı silmək istədiyinizə əminsiniz?")) return;
-
-            const path = getTasksCollectionPath(currentUserId);
-            if (!path) return;
-            
-            try {
-                const taskDocRef = doc(db, path, taskId);
-                await deleteDoc(taskDocRef);
-                showMessage("Tapşırıq silindi.", 'success');
-            } catch (error) {
-                console.error("Tapşırıq silinərkən xəta: ", error);
-                showMessage("Tapşırıq silinərkən xəta: " + error.message, 'error');
+        // Qeydiyyat funksiyası
+        function register(email, password) {
+            let users = JSON.parse(localStorage.getItem('users')) || {};
+            if (users[email]) {
+                showMessage("Bu email artıq istifadə olunur!");
+            } else {
+                users[email] = password; // Sadə şifrə saxlamaq, realda bu təhlükəlidir
+                localStorage.setItem('users', JSON.stringify(users));
+                showMessage("Qeydiyyat uğurludur! İndi daxil ola bilərsiniz.");
+                isLogin = true;
+                updateFormUI();
             }
         }
-        
-        // Tapşırıqları dinləmə (Real-vaxt yeniləmə)
-        let unsubscribeTasks = null;
-        function listenForTasks() {
-            if (!isAuthReady || !currentUserId || !db) {
-                return;
+
+        // Login funksiyası
+        function login(email, password) {
+            let users = JSON.parse(localStorage.getItem('users')) || {};
+            if (users[email] && users[email] === password) {
+                localStorage.setItem('current_user', email);
+                checkAuth();
+            } else {
+                showMessage("Email və ya şifrə yanlışdır!");
             }
-
-            // Əgər əvvəlki dinləyici varsa, onu dayandır
-            if (unsubscribeTasks) {
-                unsubscribeTasks();
-                unsubscribeTasks = null;
-            }
-
-            const path = getTasksCollectionPath(currentUserId);
-            if (!path) return;
-
-            const tasksCollection = collection(db, path);
-            taskListContainer.innerHTML = '';
-            noTasksMessage.classList.add('hidden');
-            loadingTasks.classList.remove('hidden');
-
-            // onSnapshot istifadə edərək real-vaxt dinləmə
-            unsubscribeTasks = onSnapshot(tasksCollection, (snapshot) => {
-                loadingTasks.classList.add('hidden');
-                taskListContainer.innerHTML = ''; // Siyahını təmizlə
-
-                if (snapshot.empty) {
-                    noTasksMessage.classList.remove('hidden');
-                    return;
-                } else {
-                    noTasksMessage.classList.add('hidden');
-                }
-
-                snapshot.forEach((doc) => {
-                    const task = doc.data();
-                    const taskId = doc.id;
-                    const taskElement = document.createElement('div');
-                    
-                    // Vaxtı formatlama
-                    const date = task.createdAt ? task.createdAt.toDate().toLocaleDateString('az-AZ', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Naməlum vaxt';
-
-                    taskElement.className = 'flex items-start justify-between p-4 bg-gray-800 rounded-xl shadow-md border-l-4 border-emerald-500 hover:bg-gray-700 transition-colors duration-200';
-                    taskElement.innerHTML = `
-                        <div class="flex-1 min-w-0 pr-4">
-                            <p class="text-lg font-semibold text-white truncate">${task.name}</p>
-                            <p class="text-sm text-gray-400 mt-1 break-words">${task.description || 'Təsvir yoxdur.'}</p>
-                            <p class="text-xs text-gray-500 mt-2">Əlavə edilmə: ${date}</p>
-                        </div>
-                        <div class="flex items-center space-x-2 flex-shrink-0">
-                            <!-- Silmə düyməsi -->
-                            <button onclick="deleteTask('${taskId}')" class="text-red-400 hover:text-red-500 p-2 rounded-full transition-colors duration-200" title="Sil">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                            </button>
-                        </div>
-                    `;
-                    taskListContainer.appendChild(taskElement);
-                });
-            }, (error) => {
-                console.error("Tapşırıq dinlənilərkən xəta: ", error);
-                loadingTasks.classList.add('hidden');
-                noTasksMessage.classList.remove('hidden');
-                noTasksMessage.innerText = "Məlumatı yükləmək mümkün olmadı: " + error.message;
-            });
-        }
-        
-        // Səhifə yüklənəndə Firebase-i başla
-        window.onload = function () {
-            // Başlanğıcda düyməni deaktiv et və yükləmə mesajını göstər
-            submitBtn.disabled = true;
-            loadingMessage.classList.remove('hidden');
-            
-            initFirebase();
-            updateFormUI(); // Linkin click hadisəsini düzgün təyin etmək üçün
         }
 
-    </script>
-</body>
-</html>
+        // Çıxış funksiyası
+        function logout() {
+            localStorage.removeItem('current_user');
+            checkAuth();
+        }
+
+        // İstifadəçinin login vəziyyətini yoxla
+        function checkAuth() {
+            const currentUser = localStorage.getItem('current_user');
+            if (currentUser) {
+                authFormSection.classList.add('hidden');
+                homeSection.classList.remove('hidden');
+                userEmailDisplay.innerText = currentUser;
+                pageTitle.innerText = "Hesabınız";
+            } else {
+                authFormSection.classList.remove('hidden');
+                homeSection.classList.add('hidden');
+                pageTitle.innerText = "Xoş gəlmisiniz!";
+            }
+        }
+
+        // Səhifə yüklənəndə yoxla
