@@ -1,251 +1,181 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="az">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sade Giriş Sistemi</title>
-    <!-- Tailwind CSS Yüklemesi -->
+    <title>Masroxx Login & Qeydiyyat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Fontu -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f7fafc; /* Açık Gri/Beyaz Ton */
-            transition: all 0.3s ease;
+            background: #1a202c;
+            color: #e2e8f0;
         }
-        /* Basit ve temiz bir kart stili */
-        .auth-card {
-            background: #ffffff;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        .fade {
+            transition: all 0.4s ease;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="flex items-center justify-center min-h-screen p-4">
 
-    <!-- Kimlik Doğrulama Kartı -->
-    <div id="auth-card" class="auth-card w-full max-w-md mx-auto p-6 md:p-8 rounded-xl">
-        <h1 id="form-title" class="text-3xl font-bold text-center text-gray-800 mb-6">Giriş Yap</h1>
+    <div id="app" class="w-full max-w-md bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade">
 
-        <!-- Giriş ve Kayıt Formu -->
-        <form id="auth-form" onsubmit="handleAuth(event)">
-            <div class="space-y-4">
-                <input type="email" id="email-input" placeholder="E-posta Adresi" required
-                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out text-sm">
-                
-                <input type="password" id="password-input" placeholder="Şifre" required minlength="6"
-                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out text-sm">
-            </div>
+        <header class="bg-gray-700 text-center py-6 px-4">
+            <h1 id="pageTitle" class="text-3xl font-bold text-white">Xoş gəlmisiniz!</h1>
+        </header>
 
-            <button type="submit" id="submit-button"
-                    class="w-full mt-6 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md transition duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50">
-                Giriş Yap
-            </button>
-        </form>
+        <main id="authFormSection" class="p-8 space-y-6">
+            <h2 id="formTitle" class="text-2xl font-semibold text-center text-gray-100">Giriş</h2>
 
-        <!-- Form Değiştirme Butonu -->
-        <div class="mt-6 text-center text-sm">
-            <p id="toggle-message" class="text-gray-600">
-                Hesabınız yok mu? 
-                <button type="button" onclick="toggleForm()" class="text-indigo-600 hover:text-indigo-800 font-medium transition duration-150">
-                    Hemen Kaydol
+            <form id="authForm" class="space-y-4">
+                <div>
+                    <input type="email" id="email" placeholder="Email" required
+                           class="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                </div>
+                <div>
+                    <input type="password" id="password" placeholder="Şifrə" required
+                           class="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                </div>
+                <button type="submit" id="submitBtn"
+                        class="w-full py-3 mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition-all">
+                    Daxil ol
                 </button>
-            </p>
+            </form>
+
+            <div class="text-center">
+                <p id="toggleText" class="text-sm text-gray-400">
+                    Hesabın yoxdur? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Qeydiyyat et</a>
+                </p>
+            </div>
+        </main>
+
+        <main id="homeSection" class="hidden p-8 space-y-6 text-center fade">
+            <h2 class="text-3xl font-bold text-emerald-400">Xoş gəldiniz! 🎉</h2>
+            <p id="userEmailDisplay" class="text-lg text-gray-300 mt-2"></p>
+            <p class="text-sm text-gray-400">Bu sizin əsas səhifənizdir.</p>
+            <button onclick="logout()"
+                    class="mt-8 py-3 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition-all">
+                Çıxış
+            </button>
+        </main>
+
+        <!-- Mesaj qutusu -->
+        <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+            <div class="bg-gray-700 text-white p-6 rounded-xl shadow-2xl text-center max-w-xs w-full">
+                <p id="messageText" class="text-lg mb-4"></p>
+                <button onclick="hideMessage()" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg">Bağla</button>
+            </div>
         </div>
-        <!-- Önemli Uyarı Alanı -->
-        <div class="mt-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg text-xs text-center">
-            UYARI: Bu ortamda E-posta/Şifre ile giriş **devre dışıdır**. Uygulama **Anonim** olarak başlamıştır.
-        </div>
     </div>
 
-    <!-- Kullanıcı Durumu ve Çıkış Bölümü (Başarılı Girişten Sonra Görünür) -->
-    <div id="status-card" class="auth-card w-full max-w-md mx-auto p-6 md:p-8 rounded-xl mt-4 hidden">
-        <h2 class="text-2xl font-bold text-center text-green-600 mb-4">Anonim Giriş Başarılı!</h2>
-        <p class="text-gray-700 text-sm mb-4">Uygulama Kimliği (App ID): <span id="display-app-id" class="font-mono bg-gray-100 p-1 rounded"></span></p>
-        <p class="text-gray-700 text-sm mb-6">Kullanıcı ID (UserID): <span id="display-user-id" class="font-mono bg-gray-100 p-1 rounded break-all"></span></p>
-        <p class="text-red-500 text-xs mb-4">Not: Bu giriş anonimdir. Kalıcı hesap oluşturma (E-posta/Şifre) bu ortamda desteklenmemektedir.</p>
+    <script>
+        const authFormSection = document.getElementById('authFormSection');
+        const homeSection = document.getElementById('homeSection');
+        const formTitle = document.getElementById('formTitle');
+        const submitBtn = document.getElementById('submitBtn');
+        const toggleText = document.getElementById('toggleText');
+        const pageTitle = document.getElementById('pageTitle');
+        const userEmailDisplay = document.getElementById('userEmailDisplay');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
 
-        <button onclick="handleSignOut()"
-                class="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50">
-            Anonim Oturumu Kapat
-        </button>
-    </div>
+        let isLogin = true;
 
-    <!-- Hata ve Bilgilendirme Mesaj Kutusu -->
-    <div id="message-box" class="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-50 max-w-xs" role="alert">
-        <span id="message-text" class="block">Hata mesajı burada gösterilecek.</span>
-    </div>
-
-    <!-- Firebase Modülleri ve Uygulama Lojik Alanı -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firestore log seviyesini ayarlama (Hata ayıklama için önerilir)
-        setLogLevel('Debug');
-        
-        // Zorunlu Global Değişkenleri Yükleme
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-
-        // Firebase Uygulamasını Başlatma
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Durum Değişkenleri
-        let isRegisterMode = false;
-
-        // Arayüz Elementleri
-        const authCard = document.getElementById('auth-card');
-        const statusCard = document.getElementById('status-card');
-        const formTitle = document.getElementById('form-title');
-        const submitButton = document.getElementById('submit-button');
-        const toggleMessage = document.getElementById('toggle-message');
-        const emailInput = document.getElementById('email-input');
-        const passwordInput = document.getElementById('password-input');
-
-        // Mesaj Kutusu Yönetimi
-        function showMessageBox(message, isError = true) {
-            const messageBox = document.getElementById('message-box');
-            const messageText = document.getElementById('message-text');
-
-            messageText.textContent = message;
-            messageBox.className = isError
-                ? 'fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl shadow-lg transition-opacity duration-300 z-50 max-w-xs'
-                : 'fixed bottom-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl shadow-lg transition-opacity duration-300 z-50 max-w-xs';
-            
-            messageBox.style.opacity = '1';
-            messageBox.style.pointerEvents = 'auto';
-
-            setTimeout(() => {
-                messageBox.style.opacity = '0';
-                messageBox.style.pointerEvents = 'none';
-            }, 3000);
+        function showMessage(msg) {
+            messageText.innerText = msg;
+            messageBox.classList.remove('hidden');
+            messageBox.classList.add('flex');
         }
 
-        // Giriş ve Kayıt Formunu Değiştirme
-        window.toggleForm = function() {
-            isRegisterMode = !isRegisterMode;
-            if (isRegisterMode) {
-                formTitle.textContent = "Kaydol";
-                submitButton.textContent = "Kaydol";
-                toggleMessage.innerHTML = 'Zaten hesabınız var mı? <button type="button" onclick="toggleForm()" class="text-indigo-600 hover:text-indigo-800 font-medium transition duration-150">Giriş Yap</button>';
+        function hideMessage() {
+            messageBox.classList.remove('flex');
+            messageBox.classList.add('hidden');
+        }
+
+        function updateFormUI() {
+            if (isLogin) {
+                formTitle.innerText = "Giriş";
+                submitBtn.innerText = "Daxil ol";
+                toggleText.innerHTML = `Hesabın yoxdur? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Qeydiyyat et</a>`;
             } else {
-                formTitle.textContent = "Giriş Yap";
-                submitButton.textContent = "Giriş Yap";
-                toggleMessage.innerHTML = 'Hesabınız yok mu? <button type="button" onclick="toggleForm()" class="text-indigo-600 hover:text-indigo-800 font-medium transition duration-150">Hemen Kaydol</button>';
+                formTitle.innerText = "Qeydiyyat";
+                submitBtn.innerText = "Qeydiyyat et";
+                toggleText.innerHTML = `Artıq hesabın var? <a href="#" id="toggleLink" class="text-emerald-400 font-semibold hover:text-emerald-300">Giriş et</a>`;
             }
-            // Alanları temizle
-            emailInput.value = '';
-            passwordInput.value = '';
+            document.getElementById('toggleLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                isLogin = !isLogin;
+                updateFormUI();
+            });
         }
 
-        // Kimlik Doğrulama İşlemi
-        // NOT: auth/operation-not-allowed hatasını ortadan kaldırmak için, bu ortamda E-posta/Şifre ile giriş devre dışı bırakılmıştır.
-        window.handleAuth = async function(event) {
-            event.preventDefault();
-            
-            showMessageBox("E-posta/Şifre ile giriş bu ortamda **devre dışıdır**. Uygulama zaten Anonim olarak başlatıldı.", true);
-            
-            // Eğer isterseniz, burayı tekrar açabilir ve Firebase konsolunda E-posta/Şifre girişini etkinleştirebilirsiniz.
-            /*
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            
-            if (!email || !password) {
-                showMessageBox("Lütfen e-posta ve şifrenizi girin.", true);
+        document.getElementById('toggleLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            isLogin = !isLogin;
+            updateFormUI();
+        });
+
+        document.getElementById('authForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (email === "" || password === "") {
+                showMessage("Xanaları doldurun!");
                 return;
             }
 
-            try {
-                if (isRegisterMode) {
-                    // Kayıt Modu
-                    await createUserWithEmailAndPassword(auth, email, password);
-                    showMessageBox("Kayıt başarılı! Giriş yapılıyor...", false);
-                } else {
-                    // Giriş Modu
-                    await signInWithEmailAndPassword(auth, email, password);
-                    showMessageBox("Giriş başarılı!", false);
-                }
-            } catch (error) {
-                console.error("Kimlik doğrulama hatası:", error);
-                let errorMessage = "Bir hata oluştu. Lütfen tekrar deneyin.";
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = "Bu e-posta adresi zaten kullanımda.";
-                        break;
-                    case 'auth/user-not-found':
-                    case 'auth/wrong-password':
-                        errorMessage = "E-posta veya şifre hatalı.";
-                        break;
-                    case 'auth/operation-not-allowed':
-                        errorMessage = "E-posta/Şifre ile giriş devre dışı. Lütfen Firebase konsolunuzda **Auth > Sign-in method** bölümünden bu yöntemi **etkinleştirin**.";
-                        break;
-                    default:
-                        errorMessage = `Hata: ${error.message.substring(0, 50)}...`;
-                        break;
-                }
-                showMessageBox(errorMessage, true);
-            }
-            */
-        }
-
-        // Çıkış İşlemi
-        window.handleSignOut = async function() {
-            try {
-                await signOut(auth);
-                // Çıkış yaptıktan sonra anonim olarak tekrar giriş yapılması platform gereksinimidir.
-                await signInAnonymously(auth); 
-                showMessageBox("Başarıyla çıkış yapıldı ve yeni anonim oturum başlatıldı.", false);
-            } catch (error) {
-                console.error("Çıkış hatası:", error);
-                showMessageBox("Oturum kapatılırken bir hata oluştu.", true);
-            }
-        }
-
-        // Firebase Auth Durumu Takibi
-        onAuthStateChanged(auth, (user) => {
-            const displayAppId = document.getElementById('display-app-id');
-            const displayUserId = document.getElementById('display-user-id');
-            
-            displayAppId.textContent = appId;
-
-            if (user) {
-                // Giriş yapıldı
-                const userId = user.uid;
-                displayUserId.textContent = userId;
-                authCard.classList.add('hidden');
-                statusCard.classList.remove('hidden');
+            if (isLogin) {
+                login(email, password);
             } else {
-                // Çıkış yapıldı
-                // Bu durumda onAuthStateChanged tekrar tetikleneceği için anonim giriş tekrar kontrol edilecektir.
-                authCard.classList.remove('hidden');
-                statusCard.classList.add('hidden');
+                register(email, password);
             }
         });
 
-        // Sayfa yüklendiğinde anonim veya özel token ile oturum açma (Gereklilik)
-        async function initialAuth() {
-            try {
-                // Her zaman anonim olarak oturum açmak zorunludur.
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                // Kullanıcı anonim olarak giriş yaptığı için, form otomatik olarak gizlenecektir.
-                showMessageBox("Uygulama başarıyla Anonim Giriş ile başlatıldı.", false);
-
-            } catch (error) {
-                console.error("Başlangıç kimlik doğrulama hatası:", error);
-                showMessageBox("Sistem başlangıç hatası. Konsolu kontrol edin.", true);
+        function register(email, password) {
+            let users = JSON.parse(localStorage.getItem('users')) || {};
+            if (users[email]) {
+                showMessage("Bu email artıq istifadə olunur!");
+            } else {
+                users[email] = password;
+                localStorage.setItem('users', JSON.stringify(users));
+                showMessage("Qeydiyyat uğurludur! İndi daxil ola bilərsiniz.");
+                isLogin = true;
+                updateFormUI();
             }
         }
 
-        window.onload = initialAuth;
+        function login(email, password) {
+            let users = JSON.parse(localStorage.getItem('users')) || {};
+            if (users[email] && users[email] === password) {
+                localStorage.setItem('current_user', email);
+                checkAuth();
+            } else {
+                showMessage("Email və ya şifrə yanlışdır!");
+            }
+        }
 
+        function logout() {
+            localStorage.removeItem('current_user');
+            checkAuth();
+        }
+
+        function checkAuth() {
+            const currentUser = localStorage.getItem('current_user');
+            if (currentUser) {
+                authFormSection.classList.add('hidden');
+                homeSection.classList.remove('hidden');
+                userEmailDisplay.innerText = currentUser;
+                pageTitle.innerText = "Hesabınız";
+            } else {
+                authFormSection.classList.remove('hidden');
+                homeSection.classList.add('hidden');
+                pageTitle.innerText = "Xoş gəlmisiniz!";
+            }
+        }
+
+        checkAuth();
     </script>
 </body>
 </html>
