@@ -192,6 +192,15 @@
             try {
                 // Hər hansı bir xəta olarsa konsola yazılması üçün
                 setLogLevel('Debug');
+                
+                // Konfiqurasiya yoxlaması (auth/invalid-api-key xətasını tutmaq üçün)
+                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
+                    console.error("Firebase Konfiqurasiya Xətası: API Key yoxdur və ya yanlışdır.");
+                    submitBtn.innerText = "Konfiqurasiya Xətası";
+                    showMessage("Tətbiq başlanarkən ciddi xəta: Firebase API Key yanlışdır. Bu, platforma tənzimləməsi ilə bağlıdır.", 'error');
+                    return; // Konfiqurasiya yoxdursa davam etmə
+                }
+
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
@@ -250,7 +259,16 @@
                 // onAuthStateChanged avtomatik UI-ı güncəlləyəcək
             } catch (error) {
                 console.error("Qeydiyyat xətası:", error);
-                showMessage("Qeydiyyat uğursuz oldu: " + error.message, 'error');
+                let errorMessage = "Qeydiyyat uğursuz oldu: " + error.message;
+
+                // Xüsusi olaraq 'auth/operation-not-allowed' xətasını yoxlayırıq (Sizin xətanız)
+                if (error.code === 'auth/operation-not-allowed') {
+                    errorMessage = "Qeydiyyat uğursuz oldu: **Email/Şifrə ilə giriş metodu Firebase Konsolunda AKTİV DEYİL.** Zəhmət olmasa, **Authentication -> Sign-in method** bölməsində aktivləşdirin.";
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = "Şifrə çox zəifdir. Ən azı 6 simvol olmalıdır.";
+                }
+
+                showMessage(errorMessage, 'error');
             }
         }
 
@@ -357,6 +375,7 @@
 
         // Tapşırıq silmə
         window.deleteTask = async function(taskId) {
+            // QEYD: confirm() istifadəsi tövsiyə edilmir və custom modal ilə əvəz olunmalıdır.
             if (!currentUserId || !confirm("Tapşırığı silmək istədiyinizə əminsiniz?")) return;
 
             const path = getTasksCollectionPath(currentUserId);
